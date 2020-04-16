@@ -95,11 +95,11 @@ int ping (std::string address) {
     }
 
     else {
-
+        printf("executes if to.sin_addr.s_addr == (u_int) - 1\n");
         hp = gethostbyname (address.c_str());
 
         if (!hp) {
-
+            printf("executes if !hp\n");
             std::cerr << "Unknown host " << address << std::endl;
             return -1;
         }
@@ -121,6 +121,7 @@ int ping (std::string address) {
     }
 
     if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+        printf ("if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)\n");
         // needs to run as sudo
         return -1;
     }
@@ -131,7 +132,6 @@ int ping (std::string address) {
     icp->icmp_cksum = 0;
     icp->icmp_seq = 12345;
     icp->icmp_id = getpid();
-
     cc = dataLength + ICMP_MINLEN;
     icp->icmp_cksum = in_cksum((unsigned short *)icp, cc);
 
@@ -155,7 +155,7 @@ int ping (std::string address) {
     timeVal.tv_usec = 0;
 
     while (cont) {
-
+        printf("the bigass while statement\n");
         retVal = select (s + 1, &rfds, NULL, NULL, &timeVal);
 
         if (retVal == -1) {
@@ -164,7 +164,7 @@ int ping (std::string address) {
             return -1;
         }
         else if (retVal) {
-
+            printf("if retval\n");
             fromlen = sizeof (sockaddr_in);
 
             if ((ret = recvfrom (s, (char *)packet, packLength, 0, (struct sockaddr *)&from, (socklen_t *)&fromlen)) < 0) {
@@ -175,7 +175,7 @@ int ping (std::string address) {
 
             // chekc IP header
             ip = (struct ip *)((char *)packet);
-            hlen = sizeof (struct ip);
+            hlen = sizeof( struct ip );
 
             if (ret < (hlen + ICMP_MINLEN)) {
 
@@ -187,8 +187,9 @@ int ping (std::string address) {
             icp = (struct icmp *)(packet + hlen);
 
             if (icp->icmp_type == ICMP_ECHOREPLY) {
-
-                // output icmp sequence
+                printf ("if (icp->icmp_type == ICMP_ECHOREPLY)\n");
+                std::cout << "icmp seq = " << icp->icmp_seq << std::endl;
+                // output icmp sequence     ******************** issue here
                 if (icp->icmp_seq != 12345) {
 
                     std::cout << "Received sequence #" << icp->icmp_seq << std::endl;
