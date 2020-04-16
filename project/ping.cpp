@@ -1,7 +1,7 @@
 // Written by Amir Yalamov, on April 14th, 2020
 
 // program that implements the ping command in C++
-// compile with "g++ ping.cpp" and run "./a.out"
+// compile with "g++ ping2.cpp -o ping2" and run "sudo ./ping2 hostname.com/IPAdd"
 
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -22,12 +22,15 @@
 #include <stdint.h>
 #include <iostream>
 #include <args.hxx> // CLI library for C++
+#include <iomanip>
+#include <math.h>
 
 #define DEFDATALEN  (64 - ICMP_MINLEN)
 #define MAXIPLEN    60
 #define MAXICMPLEN  76
 #define MAXPACKET   (65536 - 60 - ICMP_MINLEN)
 
+// -------------- function for calculating the checksum of a packet --------------
 uint16_t in_cksum (uint16_t *addr, unsigned len) {
 
     uint16_t final = 0;
@@ -55,51 +58,45 @@ uint16_t in_cksum (uint16_t *addr, unsigned len) {
 
 uint16_t in_cksum (uint16_t *addr, unsigned len);
 
-// funciton to perform the ping linux Command
-int ping (std::string address) {
+// global variables to keep track of packets sent or lost
+int packCounter = 0;
+int lostCounter = 0;
 
-    printf("beginning of ping\n");
+// -------------- funciton to perform the ping linux Command --------------
+int ping (std::string address) {
 
     // declaration of variables and structs
     int s, i, cc, packLength, dataLength = DEFDATALEN;
-
     struct hostent *hp;
     struct sockaddr_in to, from;
     struct ip *ip;
-
     u_char *packet, outpack[MAXPACKET];
     char hnamebuf[MAXHOSTNAMELEN];
     std::string hostname;
-
     struct icmp *icp;
-
     int ret, fromlen, hlen;
-
     fd_set rfds;
-
     struct timeval timeVal;
     int retVal;
     struct timeval start, end;
-    int endTime;
-
+    float endTime;
     bool cont = true;
-
     to.sin_family = AF_INET;
-
     to.sin_addr.s_addr = inet_addr (address.c_str());
 
+    // if given address is in IP form, set the hostname as the given address in an argument of the ping command
     if (to.sin_addr.s_addr != (u_int) - 1) {
-        printf("if (to.sin_addr.s_addr != (u_int) - 1)\n");
 
         hostname = address;
     }
 
+    // if given address is in a DNS form
     else {
-        printf("executes if to.sin_addr.s_addr == (u_int) - 1\n");
+
         hp = gethostbyname (address.c_str());
 
         if (!hp) {
-            printf("executes if !hp\n");
+
             std::cerr << "Unknown host " << address << std::endl;
             return -1;
         }
@@ -125,7 +122,6 @@ int ping (std::string address) {
         // needs to run as sudo
         return -1;
     }
-
     icp = (struct icmp *) outpack;
     icp->icmp_type = ICMP_ECHO;
     icp->icmp_code = 0;
@@ -135,9 +131,11 @@ int ping (std::string address) {
     cc = dataLength + ICMP_MINLEN;
     icp->icmp_cksum = in_cksum((unsigned short *)icp, cc);
 
+    /* ********** timer starts ********** */
     gettimeofday (&start, NULL);
-
+    /* ********** ECHO_REQUEST SENT ********** */
     i = sendto (s, (char *)outpack, cc, 0, (struct sockaddr*)&to, (socklen_t)sizeof(struct sockaddr_in));
+
 
     if (i < 1 || i != cc) {
 
@@ -151,11 +149,11 @@ int ping (std::string address) {
 
     FD_ZERO (&rfds);
     FD_SET (s, &rfds);
-    timeVal.tv_sec = 1;
+    timeVal.tv_sec = 1;     // time interval that requests wait is 2 seconds
     timeVal.tv_usec = 0;
 
     while (cont) {
-        printf("the bigass while statement\n");
+
         retVal = select (s + 1, &rfds, NULL, NULL, &timeVal);
 
         if (retVal == -1) {
@@ -163,8 +161,9 @@ int ping (std::string address) {
             perror("select()\n");
             return -1;
         }
+
         else if (retVal) {
-            printf("if retval\n");
+
             fromlen = sizeof (sockaddr_in);
 
             if ((ret = recvfrom (s, (char *)packet, packLength, 0, (struct sockaddr *)&from, (socklen_t *)&fromlen)) < 0) {
@@ -173,12 +172,11 @@ int ping (std::string address) {
                 return -1;
             }
 
-            // chekc IP header
+            // check IP header
             ip = (struct ip *)((char *)packet);
             hlen = sizeof( struct ip );
 
             if (ret < (hlen + ICMP_MINLEN)) {
-
                 std::cerr << "Packet was too short (" << ret << " bytes) from " << hostname << std::endl;
                 return -1;
             }
@@ -186,87 +184,45 @@ int ping (std::string address) {
             // ICMP Section
             icp = (struct icmp *)(packet + hlen);
 
+            // if reply is recieved from pinged address
             if (icp->icmp_type == ICMP_ECHOREPLY) {
-                printf ("if (icp->icmp_type == ICMP_ECHOREPLY)\n");
-                std::cout << "icmp seq = " << icp->icmp_seq << std::endl;
-                // output icmp sequence     ******************** issue here
-                if (icp->icmp_seq != 12345) {
 
-                    std::cout << "Received sequence #" << icp->icmp_seq << std::endl;
-                    continue;
-                }
-                // output icmp id
-                if (icp->icmp_id != getpid()) {
+                std::cout << "Receiving from " << hostname << ", ";
 
-                    std::cout << "Received id " << icp->icmp_id << std::endl;
-                    continue;
-                }
+                // this section is for Round Trip Delay Time (RTT) calculations
+                gettimeofday (&end, NULL);  /* ********** timer ends ********** */
 
-                cont = false;
-            }
+                // calculate time between ECHO_REQUEST and ECHO_REPLY in terms of milliseconds
+                endTime = 1000000 * (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec);
+                // convert from usec to ms and round the value to 2 decimal places
+                endTime =  floorf((endTime / 1000) * 100) / 100;
 
-            else {
+                // output RTT info
+                std::cout << lostCounter << " total packets lost, ";
+                std::cout << "ICMP Sequence = " << (1 + packCounter + lostCounter) << ", ";
+                std::cout << "Round Trip Time(RTT) = " << endTime << " ms" << std::endl;
 
-                std::cout << "Recv: not an echo reply." << std::endl;
+                packCounter ++;	// + 1 transmitted packet
                 continue;
             }
 
-            gettimeofday (&end, NULL);
-            endTime = 1000000 * (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec);
+            // packet is lost
+            else {
 
-            if (endTime < 1) {
-
-                endTime = 1;
-
-                std::cout << "Elapsed time: " << endTime << " usec" << std::endl;
+                std::cout << "1 packet lost." << std::endl;
+		        lostCounter ++; // + 1 lost packet
+                continue;
             }
 
-            return endTime;
-
         }
 
-        else {
-
-            std::cout << "No data within one second.\n";
-            return 0;
-        }
+        cont = false;
     }
-    printf("end of ping\n");
 
     return 0;
 }
 
-
-// function that will keep sending ICMP "echo requests" in an infinite loop until user quits CLI
-// argument 'address' is in the form of either a hostname or an IP address
-// void requestLoop (std::string address) {
-//
-//     // keep sending out requests until user enters Control+C
-//     while (1) {
-//
-//         return ping(address);
-//     }
-// }
-
 int main (int argc, char *argv[]) {
-
-    // int sockfd;
-    // char *ipAddress, *reverseHostname;
-    // // struct sockAddressIn addressCon;
-    // char netBuffer [NI_MAXHOST];
-
-    // 2nd positional terminal argument should be the DNS address of a website
-    //ipAddress = dnsLookup (argv[1], &addressCon);   // TODO: implement dnsLookup function
-
-    // // if no address is provided for DNS address argument
-    // if (ipAddress == NULL) {
-    //
-    //     printf("\nCould not resolve hostname, DNS lookup failed.\n");
-    //
-    //     return 0;
-    // }
-
-
 
     // instantiating objects and characteristics for a parser to  create a CLI
     args::ArgumentParser parser ("Ping Command Line Interface");
@@ -296,8 +252,15 @@ int main (int argc, char *argv[]) {
 
     // here is where the program calls the code to  sned ICMP "echo requests" in an infinite loop
     if (address) {
-        std::cout << "address: " << args::get(address) << std::endl;
-        return ping(get(address).c_str());
+        //std::cout << "address: " << args::get(address) << std::endl;
+        std::cout << "ping " << args::get(address) << "...\n";
+
+        while (ping) {
+            //ping(get(address).c_str());
+            if (ping(get(address).c_str()) == -1) {
+                break;
+            }
+        }
     }
 
 
