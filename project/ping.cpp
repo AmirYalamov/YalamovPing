@@ -1,7 +1,7 @@
 // Written by Amir Yalamov, on April 14th, 2020
 
 // program that implements the ping command in C++
-// compile with "g++ ping2.cpp -o ping2" and run "sudo ./ping2 hostname.com/IPAdd"
+// compile with "g++ ping.cpp -o ping" and run "sudo ./ping hostname.com/IP Address"
 
 #include <arpa/inet.h>
 #include <sys/types.h>
@@ -118,7 +118,6 @@ int ping (std::string address) {
     }
 
     if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
-        printf ("if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)\n");
         // needs to run as sudo
         return -1;
     }
