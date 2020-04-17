@@ -186,8 +186,8 @@ int ping (std::string address, int timeToLive, char internetProtocol6, double ne
 
     // if -i argument specified in ping, set new itnerval
     if (newInterval > 0) {
-        timeVal.tv_sec = floor(newInterval);
-        timeVal.tv_usec = std::fmod(newInterval, 1);
+        timeVal.tv_sec = floor(newInterval);            // set the seconds
+        timeVal.tv_usec = std::fmod(newInterval, 1) * 1000000;    // set the microseconds
     }
     else{
         timeVal.tv_sec = 1;     // default time interval that requests wait is 1 seconds
