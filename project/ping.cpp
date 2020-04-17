@@ -17,7 +17,6 @@ OPTIONS:
                                         during the ping
       "--" can be used to terminate flag options and force all following
       arguments to be treated as positional options
-
  */
 
 #include <arpa/inet.h>
@@ -287,11 +286,11 @@ int main (int argc, char *argv[]) {
     // using the Args library to implement a C++ CLI: https://github.com/taywee/args
     // instantiating objects and characteristics for a parser to  create a CLI
     args::ArgumentParser parser ("Ping Command Line Interface");
-    args::HelpFlag help (parser, "help", "display help menu", {'h', "help"});
+    args::HelpFlag help (parser, "help", "Display help menu", {'h', "help"});
     args::CompletionFlag completion (parser, {"complete"});
     args::Positional<std::string> address (parser, "address", "The hostname or IP Address");
     args::ValueFlag<int> timeToLive (parser, "Time To Live(TTL)", "Set the IP Time to Live", {'t'});
-    args::ValueFlag<char> ipv6 (parser, "IPv6 Support On(y/n)", "Use IP version 6to support new addresses", {"ipv6"});
+    args::ValueFlag<char> ipv6 (parser, "IPv6 Support On(y/n)", "Use IP version 6 to support new addresses", {"ipv6"});
     args::ValueFlag<double> newInterval (parser, "interval seconds", "Wait an interval amount of seconds between sending each packet for optimization", {'i'});
     args::ValueFlag<int> packetsToSend (parser, "number of packets", "Specify how many packets should be sent during the ping", {'p'});
 
