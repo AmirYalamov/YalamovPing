@@ -46,6 +46,7 @@ Ping can have example arguments as such:
 
 - [C++](https://www.cplusplus.com/)
 - [args](https://github.com/taywee/args)
+- [Atom](https://atom.io/)
 - Love🧡
 
 ## Credits
