@@ -41,6 +41,8 @@ Ping can have example arguments as such:
 - ```sudo ./bing -t 20 vw.ca```
 - ```sudo ./bing --ipv6 porsche.com``` 
 - ```sudo ./bing -t 50 --ipv6 lamborghini.com```
+- ```sudo ./ping -i 3.14 reddit.com```
+- ```sudo ./ping -p 2 news.ycombinator.com```
 
 ## Built With
 
