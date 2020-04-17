@@ -63,7 +63,7 @@ int packCounter = 0;
 int lostCounter = 0;
 
 // -------------- funciton to perform the ping linux Command --------------
-int ping (std::string address) {
+int ping (std::string address, int timeToLive) {
 
     // declaration of variables and structs
     int s, i, cc, packLength, dataLength = DEFDATALEN;
@@ -121,6 +121,15 @@ int ping (std::string address) {
         // needs to run as sudo
         return -1;
     }
+
+    int ttlVal = 255;
+    if (timeToLive != NULL) {
+        ttlVal = timeToLive;
+    }
+
+    // set socket options to account for TTL argument
+    setsockopt(s, SOL_IP, IP_TTL, &ttlVal, sizeof(ttlVal));
+
     icp = (struct icmp *) outpack;
     icp->icmp_type = ICMP_ECHO;
     icp->icmp_code = 0;
@@ -183,10 +192,12 @@ int ping (std::string address) {
             // ICMP Section
             icp = (struct icmp *)(packet + hlen);
 
+            std::cout << "Receiving from " << hostname << ", ";
+
             // if reply is recieved from pinged address
             if (icp->icmp_type == ICMP_ECHOREPLY) {
 
-                std::cout << "Receiving from " << hostname << ", ";
+
 
                 // this section is for Round Trip Delay Time (RTT) calculations
                 gettimeofday (&end, NULL);  /* ********** timer ends ********** */
@@ -197,8 +208,9 @@ int ping (std::string address) {
                 endTime =  floorf((endTime / 1000) * 100) / 100;
 
                 // output RTT info
-                std::cout << lostCounter << " total packets lost, ";
+                std::cout << lostCounter << " total packet(s) lost, ";
                 std::cout << "ICMP Sequence = " << (1 + packCounter + lostCounter) << ", ";
+                std::cout << "Time To Live(TTL) = " << ttlVal << ", ";
                 std::cout << "Round Trip Time(RTT) = " << endTime << " ms" << std::endl;
 
                 packCounter ++;	// + 1 transmitted packet
@@ -207,9 +219,13 @@ int ping (std::string address) {
 
             // packet is lost
             else {
+                lostCounter ++; // + 1 lost packet
 
-                std::cout << "1 packet lost." << std::endl;
-		        lostCounter ++; // + 1 lost packet
+                std::cout << "1 packet lost, ";
+                std::cout << lostCounter << " total packet(s) lost, ";
+                std::cout << "ICMP Sequence = " << (1 + packCounter + lostCounter) << ", ";
+                std::cout << "Time to Live(TTL) exceeded" << std::endl;
+
                 continue;
             }
 
@@ -223,14 +239,16 @@ int ping (std::string address) {
 
 int main (int argc, char *argv[]) {
 
+    // using the Args library to implement a C++ CLI: https://github.com/taywee/args
     // instantiating objects and characteristics for a parser to  create a CLI
     args::ArgumentParser parser ("Ping Command Line Interface");
-    args::HelpFlag help (parser, "help", "display help menu", {'h'});
+    args::HelpFlag help (parser, "help", "display help menu", {'h', "help"});
     args::CompletionFlag completion (parser, {"complete"});
-    args::Positional<std::string> address(parser, "address", "The hostname or IP Address");
+    args::Positional<std::string> address (parser, "address", "The hostname or IP Address");
+    args::ValueFlag<int> timeToLive (parser, "Time To Live(TTL)", "Set the IP Time to Live", {'t'});
 
+    // error handling for the CLI library Args
     try {
-
         parser.ParseCLI(argc, argv);
     }
     catch (const args::Completion& e) {
@@ -238,12 +256,15 @@ int main (int argc, char *argv[]) {
         std::cout << e.what();
     }
     catch (const args::Help&) {
-
         std::cout << parser;
         return 0;
     }
     catch (const args::ParseError& e) {
-
+        std::cerr << e.what() << std::endl;
+        std::cerr << parser;
+        return 1;
+    }
+    catch (args::ValidationError e) {
         std::cerr << e.what() << std::endl;
         std::cerr << parser;
         return 1;
@@ -251,17 +272,15 @@ int main (int argc, char *argv[]) {
 
     // here is where the program calls the code to  sned ICMP "echo requests" in an infinite loop
     if (address) {
-        //std::cout << "address: " << args::get(address) << std::endl;
+
         std::cout << "ping " << args::get(address) << "...\n";
 
         while (ping) {
-            //ping(get(address).c_str());
-            if (ping(get(address).c_str()) == -1) {
+            if (ping(get(address).c_str(), get(timeToLive)) == -1) {
                 break;
             }
         }
     }
-
 
     return 0;
 }
