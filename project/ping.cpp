@@ -74,7 +74,7 @@ int packCounter = 0;
 int lostCounter = 0;
 
 // -------------- funciton to perform the ping linux Command --------------
-int ping (std::string address, int timeToLive, char internetProtocol6) {
+int ping (std::string address, int timeToLive, char internetProtocol6, double newInterval) {
 
     // declaration of variables and structs
     int s, i, cc, packLength, dataLength = DEFDATALEN;
@@ -183,8 +183,16 @@ int ping (std::string address, int timeToLive, char internetProtocol6) {
 
     FD_ZERO (&rfds);
     FD_SET (s, &rfds);
-    timeVal.tv_sec = 1;     // time interval that requests wait is 1 seconds
-    timeVal.tv_usec = 0;
+
+    // if -i argument specified in ping, set new itnerval
+    if (newInterval > 0) {
+        timeVal.tv_sec = floor(newInterval);
+        timeVal.tv_usec = std::fmod(newInterval, 1);
+    }
+    else{
+        timeVal.tv_sec = 1;     // default time interval that requests wait is 1 seconds
+        timeVal.tv_usec = 0;
+    }
 
     while (cont) {
 
@@ -273,6 +281,8 @@ int main (int argc, char *argv[]) {
     args::Positional<std::string> address (parser, "address", "The hostname or IP Address");
     args::ValueFlag<int> timeToLive (parser, "Time To Live(TTL)", "Set the IP Time to Live", {'t'});
     args::ValueFlag<char> ipv6 (parser, "IPv6 Support On", "Use IP version 6(y/n)", {"ipv6"});
+    args::ValueFlag<double> newInterval (parser, "interval seconds", "Wait an interval amount of seconds between sending each packet", {'i'});
+
 
     // error handling for the CLI library Args
     try {
@@ -303,7 +313,7 @@ int main (int argc, char *argv[]) {
         std::cout << "ping " << args::get(address) << "...\n";
 
         while (ping) {
-            if (ping(get(address).c_str(), get(timeToLive), get(ipv6)) == -1) {
+            if (ping(get(address).c_str(), get(timeToLive), get(ipv6), get(newInterval)) == -1) {
                 break;
             }
         }
