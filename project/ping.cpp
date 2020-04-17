@@ -2,7 +2,7 @@
 
 // program that implements the ping command in C++
 // compile with "g++ ping.cpp -o ping" and run "sudo ./ping hostname.com/IP Address"
-// run "sudo ./ping -h/--help" to show a full list of all the possible functionality
+// run "sudo ./ping -h/--help" to show a full list of all the possible functionality:
 /*
 OPTIONS:
 
