@@ -1,4 +1,6 @@
-![Yalamov Ping Logo](https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/yalamovping.png)
+<p align="center">
+  <img width="300" height="220" src="https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/yalamovping.png">
+</p>
 
 The Yalamov Ping is a small Ping CLI for MacOS and Linux. This project was done as a submission to the 2020 Cloudflare Internship Application: Systems challenge.
 
@@ -24,8 +26,8 @@ This Ping CLI comes with a nice helpful ```OPTIONS``` menu that can be accessed 
 ![ping help screen](https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/pinghelp.png)
 
 
-## Using ping
-To use the ping utility, enter the command to run ping and either a hostname or IP address as an argument. For example, both commands are valid: 
+## Using Ping
+To use the ping utility, make sure that you have a working network connection by being connected to WiFi or by Ethernet cable. Then enter the command to run ping and either a hostname or IP address as an argument. For example, both commands are valid: 
 
 ```bash
 sudo ./ping google.com
@@ -33,7 +35,22 @@ sudo ./ping 172.217.1.14
 ```
 which will result in ping running until you hit "Control + C" on your keyboard to exit the ping utility:
 
+![ping outout](https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/pingcommand.png)
 
+Ping can have example arguments as such:
+- ```sudo ./bing -t 20 vw.ca```
+- ```sudo ./bing --ipv6 porsche.com``` 
+- ```sudo ./bing -t 50 --ipv6 lamborghini.com```
+
+## Built With
+
+- [C++](https://www.cplusplus.com/)
+- [args](https://github.com/taywee/args)
+- Love🧡
+
+## Credits
+
+I want to thank [Taylor C. Richberger](https://github.com/Taywee) for developing the args library, the C++ langauge team, and of course Cloudflare for offering this amazing opportunity.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](https://choosealicense.com/licenses/mit/) © [Amir Yalamov](https://amiryalamov.github.io/)
