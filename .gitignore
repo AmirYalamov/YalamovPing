@@ -1,0 +1,2 @@
+# Ignore generated binary exe from ping.cpp
+project/ping
