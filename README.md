@@ -6,7 +6,7 @@ The Yalamov Ping is a small Ping CLI for MacOS and Linux. This project was done 
 
 ## Installation
 
-Download the project ZIP file and change directories into the project's directory. Type the following command into the terminal to install the args library:
+Download the ```project.zip``` file and change directories into the project's directory. Type the following command into the terminal to install the args library:
 
 ```bash
 sudo make install
