@@ -74,7 +74,7 @@ int packCounter = 0;
 int lostCounter = 0;
 
 // -------------- funciton to perform the ping linux Command --------------
-int ping (std::string address, int timeToLive, char internetProtocol6, double newInterval) {
+int ping (std::string address, int timeToLive, char internetProtocol6, double newInterval, int packetsToSend) {
 
     // declaration of variables and structs
     int s, i, cc, packLength, dataLength = DEFDATALEN;
@@ -196,6 +196,11 @@ int ping (std::string address, int timeToLive, char internetProtocol6, double ne
 
     while (cont) {
 
+        // checks how many packets have been sent if the -p argument was passed
+        if (packetsToSend > 0 && packCounter >= packetsToSend) {
+            return -1;
+        }
+
         retVal = select (s + 1, &rfds, NULL, NULL, &timeVal);
 
         if (retVal == -1) {
@@ -280,8 +285,9 @@ int main (int argc, char *argv[]) {
     args::CompletionFlag completion (parser, {"complete"});
     args::Positional<std::string> address (parser, "address", "The hostname or IP Address");
     args::ValueFlag<int> timeToLive (parser, "Time To Live(TTL)", "Set the IP Time to Live", {'t'});
-    args::ValueFlag<char> ipv6 (parser, "IPv6 Support On", "Use IP version 6(y/n)", {"ipv6"});
-    args::ValueFlag<double> newInterval (parser, "interval seconds", "Wait an interval amount of seconds between sending each packet", {'i'});
+    args::ValueFlag<char> ipv6 (parser, "IPv6 Support On(y/n)", "Use IP version 6to support new addresses", {"ipv6"});
+    args::ValueFlag<double> newInterval (parser, "interval seconds", "Wait an interval amount of seconds between sending each packet for optimization", {'i'});
+    args::ValueFlag<int> packetsToSend (parser, "number of packets", "Specify how many packets should be sent during the ping", {'p'});
 
 
     // error handling for the CLI library Args
@@ -313,7 +319,7 @@ int main (int argc, char *argv[]) {
         std::cout << "ping " << args::get(address) << "...\n";
 
         while (ping) {
-            if (ping(get(address).c_str(), get(timeToLive), get(ipv6), get(newInterval)) == -1) {
+            if (ping(get(address).c_str(), get(timeToLive), get(ipv6), get(newInterval), get(packetsToSend)) == -1) {
                 break;
             }
         }
