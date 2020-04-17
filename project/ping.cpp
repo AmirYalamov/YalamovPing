@@ -63,7 +63,7 @@ int packCounter = 0;
 int lostCounter = 0;
 
 // -------------- funciton to perform the ping linux Command --------------
-int ping (std::string address, int timeToLive) {
+int ping (std::string address, int timeToLive, char internetProtocol6) {
 
     // declaration of variables and structs
     int s, i, cc, packLength, dataLength = DEFDATALEN;
@@ -117,13 +117,28 @@ int ping (std::string address, int timeToLive) {
         return -1;
     }
 
-    if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+    bool ipv6 = false;
+    // if ipv6 is requested from the ping command
+    if (internetProtocol6 == 'y') {
+        ipv6 = true;
+
+        to.sin_family = AF_INET6;
+        s = socket(AF_INET6, SOCK_RAW, IPPROTO_ICMP);
+
+        if ((s = socket(AF_INET6, SOCK_RAW, IPPROTO_ICMP)) < 0) {
+            // needs to run as sudo
+            return -1;
+        }
+    }
+
+    else if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
         // needs to run as sudo
         return -1;
     }
 
+    // default value for TTL is 255 seconds, unless a value is specified from the command ping
     int ttlVal = 255;
-    if (timeToLive != NULL) {
+    if (timeToLive > 0) {
         ttlVal = timeToLive;
     }
 
@@ -157,7 +172,7 @@ int ping (std::string address, int timeToLive) {
 
     FD_ZERO (&rfds);
     FD_SET (s, &rfds);
-    timeVal.tv_sec = 1;     // time interval that requests wait is 2 seconds
+    timeVal.tv_sec = 1;     // time interval that requests wait is 1 seconds
     timeVal.tv_usec = 0;
 
     while (cont) {
@@ -246,6 +261,7 @@ int main (int argc, char *argv[]) {
     args::CompletionFlag completion (parser, {"complete"});
     args::Positional<std::string> address (parser, "address", "The hostname or IP Address");
     args::ValueFlag<int> timeToLive (parser, "Time To Live(TTL)", "Set the IP Time to Live", {'t'});
+    args::ValueFlag<char> ipv6 (parser, "IPv6 Support On", "Use IP version 6(y/n)", {"ipv6"});
 
     // error handling for the CLI library Args
     try {
@@ -276,7 +292,7 @@ int main (int argc, char *argv[]) {
         std::cout << "ping " << args::get(address) << "...\n";
 
         while (ping) {
-            if (ping(get(address).c_str(), get(timeToLive)) == -1) {
+            if (ping(get(address).c_str(), get(timeToLive), get(ipv6)) == -1) {
                 break;
             }
         }
