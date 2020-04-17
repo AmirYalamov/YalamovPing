@@ -6,12 +6,18 @@
 /*
 OPTIONS:
 
- -h, --help                        display help menu
- address                           The hostname or IP Address
- -t[Time To Live(TTL)]             Set the IP Time to Live
- --ipv6=[IPv6 Support On]          Use IP version 6(y/n)
- "--" can be used to terminate flag options and force all following
- arguments to be treated as positional options
+      -h, --help                        display help menu
+      address                           The hostname or IP Address
+      -t[Time To Live(TTL)]             Set the IP Time to Live
+      --ipv6=[IPv6 Support On(y/n)]     Use IP version 6to support new addresses
+      -i[interval seconds]              Wait an interval amount of seconds
+                                        between sending each packet for
+                                        optimization
+      -p[number of packets]             Specify how many packets should be sent
+                                        during the ping
+      "--" can be used to terminate flag options and force all following
+      arguments to be treated as positional options
+
  */
 
 #include <arpa/inet.h>
