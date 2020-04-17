@@ -1,8 +1,18 @@
-// Written by Amir Yalamov, on April 14th, 2020
+// Written by Amir Yalamov, from April 14th - April 17th, 2020
 
 // program that implements the ping command in C++
 // compile with "g++ ping.cpp -o ping" and run "sudo ./ping hostname.com/IP Address"
 // run "sudo ./ping -h/--help" to show a full list of all the possible functionality
+/*
+OPTIONS:
+
+ -h, --help                        display help menu
+ address                           The hostname or IP Address
+ -t[Time To Live(TTL)]             Set the IP Time to Live
+ --ipv6=[IPv6 Support On]          Use IP version 6(y/n)
+ "--" can be used to terminate flag options and force all following
+ arguments to be treated as positional options
+ */
 
 #include <arpa/inet.h>
 #include <sys/types.h>
