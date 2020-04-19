@@ -60,7 +60,7 @@ Ping can have example arguments as such:
 
 ## Credits
 
-I want to thank [Taylor C. Richberger](https://github.com/Taywee) for developing the args library, the C++ langauge team, and of course Cloudflare for offering this amazing opportunity.
+I want to thank [Taylor C. Richberger](https://github.com/Taywee) for developing the args library, the C++ language team, and of course Cloudflare for offering this amazing opportunity.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/) © [Amir Yalamov](https://amiryalamov.github.io/)
