@@ -2,7 +2,7 @@
   <img width="300" height="220" src="https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/yalamovping.png">
 </p>
 
-The Yalamov Ping is a small Ping CLI for MacOS and Linux. This project was done as a submission to the 2020 Cloudflare Internship Application: Systems challenge.
+YalamovPing is a small ping command CLI for MacOS and Linux. This project was done to improve upon the ping command with flexibility, customization, and performance in mind.
 
 ## Installation
 
@@ -21,7 +21,7 @@ And you are good to go to use the Yalamov Ping!
 
 ## Features
 
-This Ping CLI comes with a nice helpful ```OPTIONS``` menu that can be accessed by running the command ```sudo ./ping -h``` or ```sudo ./ping --help``` which shows all the available features:
+This ping CLI comes with a nice helpful ```OPTIONS``` menu that can be accessed by running the command ```sudo ./ping -h``` or ```sudo ./ping --help``` which shows all the available features:
 
 ![ping help screen](https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/newpinghelp.png)
 
@@ -60,7 +60,7 @@ Ping can have example arguments as such:
 
 ## Credits
 
-I want to thank [Taylor C. Richberger](https://github.com/Taywee) for developing the args library, the C++ language team, and of course Cloudflare for offering this amazing opportunity.
+I want to thank [Taylor C. Richberger](https://github.com/Taywee) for developing the args library, the C++ language team, and the GitHub team.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/) © [Amir Yalamov](https://amiryalamov.github.io/)
