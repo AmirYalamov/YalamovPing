@@ -2,7 +2,7 @@
   <img width="300" height="220" src="https://github.com/AmirYalamov/cloudflare-internship-2020-systems-submission/blob/master/images/yalamovping.png">
 </p>
 
-YalamovPing is a small ping command CLI for MacOS and Linux. This project was done to improve upon the ping command with flexibility, customization, and performance in mind.
+YalamovPing is a small ping command line interface for MacOS and Linux. This project was done to improve upon the ping command with flexibility, customization, and performance in mind.
 
 ## Installation
 
